@@ -141,6 +141,7 @@ void Game::leaving()
 {
 	for(unsigned int i=0;i<m_mobs.size();i++)
 	{
+		m_world.removeBody(m_mobs[i]->entity());
 		delete m_mobs[i];
 	}
 	m_mobs.clear();
