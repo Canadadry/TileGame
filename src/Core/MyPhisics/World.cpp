@@ -29,6 +29,17 @@
 #include "World.h"
 #include "Body.h"
 #include "Entity.h"
+#include  "CollisionHandler.h"
+
+World::World(CollisionHandler* collisionHandler)
+: m_collisionHandler(collisionHandler)
+{
+	if(m_collisionHandler == 0)
+	{
+		m_collisionHandler = this;
+	}
+}
+
 
 void World::appendBody(Body* body)
 {
@@ -69,15 +80,25 @@ void World::step(int elapsedTimeMS)
 	}
 }
 
+
 bool World::checkBodyCollision(Body& body)
 {
 	bool ret = false;
 	for(bIter it = m_bodies.begin() ; it != m_bodies.end() ; it++ )
 	{
 		if(&body == *it) continue;
-		ret = ret || body.intersects(**it);
+		if( body.intersects(**it))
+		{
+			ret = true;
+			m_collisionHandler->handleCollision(&body,*it);
+		}
 	}
 
 	return ret;
 }
+
+void World::handleCollision(Body* body1, Body* body2)
+{
+}
+
 

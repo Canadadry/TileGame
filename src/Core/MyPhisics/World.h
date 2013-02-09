@@ -30,13 +30,15 @@
 #define WORLD_H_
 
 #include <list>
+#include "CollisionHandler.h"
 
 class Body;
 class Entity;
 
-class World
+class World : public CollisionHandler
 {
 public:
+	World(CollisionHandler* collisionHandler = 0);
 	void appendBody(Body* body);
 	void removeBody(Body* body);
 	void clearBodies();
@@ -44,7 +46,10 @@ public:
 	void step(int elapsedTimeMS);
 	bool checkBodyCollision(Body& body);
 
+	virtual void handleCollision(Body* body1,Body* body2);
+
 private:
+	CollisionHandler* m_collisionHandler;
 	std::list<Body*> m_bodies;
 	std::list<Entity*> m_entities;
 };

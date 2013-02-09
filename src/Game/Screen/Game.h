@@ -29,7 +29,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
-#include "../../Core/GameCore/Screen.h"
+#include "Core/GameCore/Screen.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -42,11 +42,12 @@
 
 #include "Core/MyPhisics/Entity.h"
 #include "Core/MyPhisics/World.h"
+#include "Core/MyPhisics/CollisionHandler.h"
 
 #include "Game/Entity/Player.h"
 #include "Game/Entity/Goomba.h"
 
-class Game: public Screen
+class Game: public Screen, public CollisionHandler
 {
 public:
 	Game(Screen* previous = 0);
@@ -55,6 +56,8 @@ public:
 	virtual void handleEvent(const sf::Event& Event);
     virtual void update(int elapsedTimeMS);
 	virtual void entering();
+
+	virtual void handleCollision(Body* body1,Body* body2);
 protected:
     virtual void render(sf::RenderTarget* screen_surface);
 private:
@@ -78,6 +81,8 @@ private:
 
 	int m_width_in_tile;
 	int m_height_in_tile;
+
+	bool m_playerDead;
 
 };
 

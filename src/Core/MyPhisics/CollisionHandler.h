@@ -1,7 +1,7 @@
 /*
- * Body.h
+ * CollisionHandler.h
  *
- * TileGame - Copyright (c) 25 d残. 2012 - Jerome Mourey
+ * TileGame - Copyright (c) 9 f思r. 2013 - Jerome Mourey
  *
  * This software is provided 'as-is', without any express or
  * implied warranty. In no event will the authors be held
@@ -23,38 +23,19 @@
  * 3. This notice may not be removed or altered from any
  *    source distribution.
  *
- *  Created on: 25 d残. 2012
+ *  Created on: 9 f思r. 2013
  */
 
-#ifndef BODY_H_
-#define BODY_H_
+#ifndef COLLISIONHANDLER_H_
+#define COLLISIONHANDLER_H_
 
-#include <SFML/System/Vector2.hpp>
-#include  <SFML/Graphics/Rect.hpp>
+class Body;
 
-class World;
-
-class Body
+class CollisionHandler
 {
 public:
-	Body(float left,float top, float width, float height);
-	Body(float left,float top, float width, float height, float xOrigin, float yOrigin);
-	virtual ~Body(){}
-	void setOrigin(sf::Vector2f origin);
-	void setPosition(sf::Vector2f position);
-	void setSize(sf::Vector2f size);
-	sf::Vector2f position() const;
-
-	virtual bool intersects(const Body& body)const;
-	virtual void step(World& world,int elapsedTimeMS){}
-
-	int type;
-
-protected:
-	sf::FloatRect m_aabb;
-	sf::Vector2f m_origin;
-
-
+	virtual ~CollisionHandler();
+	virtual void handleCollision(Body* body1,Body* body2) = 0;
 };
 
-#endif /* BODY_H_ */
+#endif /* COLLISIONHANDLER_H_ */

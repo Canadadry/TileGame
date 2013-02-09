@@ -31,6 +31,7 @@
 Body::Body(float left,float top, float width, float height)
 : m_aabb(left,top,width,height)
 , m_origin(0.0,0.0)
+, type(0)
 {}
 
 Body::Body(float left,float top, float width, float height, float xOrigin, float yOrigin)

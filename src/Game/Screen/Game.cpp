@@ -36,11 +36,33 @@ extern int screen_height;
 extern int tile_size;
 extern std::string path;
 
+namespace BodyType
+{
+	enum BodyType{
+		Tile   = 0,
+		Player  ,
+		Goomba
+	};
+}
+
 
 Game::Game(Screen* previous)
 : m_enteringEffect(0)
 , m_scene2D(0)
 , m_previous(previous)
+, m_map()
+, m_bg_map()
+, m_bg_text()
+, m_bg()
+, m_bg2()
+, m_tilesets()
+, m_tilemap()
+, m_player(0)
+, m_world(this)
+, m_mobs()
+, m_width_in_tile(0)
+, m_height_in_tile(0)
+, m_playerDead(false)
 {
 
 	m_scene2D = new Scene2D(path+"/level_fat.tmx");
@@ -48,7 +70,6 @@ Game::Game(Screen* previous)
 
 	m_width_in_tile = m_scene2D->width_in_tile;
 	m_height_in_tile = m_scene2D->height_in_tile;
-
 
 	m_bg_text.loadFromFile(path+"/bg.png");
 	m_bg.setTexture(m_bg_text);
@@ -116,6 +137,7 @@ void Game::entering()
 		m_map.push_back(m_tilemap[i]);
 	}
 	m_player = new Player(m_scene2D->player.x,m_scene2D->player.y,m_scene2D->tile_size);
+	m_player->entity()->type = BodyType::Player;
 	m_world.appendBody(m_player->entity());
 	m_map.push_back(m_player->drawable());
 
@@ -123,6 +145,7 @@ void Game::entering()
 	{
 		Scene2D::Entity& entity = m_scene2D->entities[i];
 		Mob* mob = new Goomba(entity.x,entity.y,m_scene2D->tile_size);
+		mob->entity()->type = BodyType::Goomba;
 		m_mobs.push_back(mob);
 		m_map.push_back(mob->drawable());
 		m_world.appendBody(mob->entity());
@@ -130,15 +153,25 @@ void Game::entering()
 	}
 
 	m_enteringEffect= new ScreenEffect(this, 1000,sf::Vector2f( (float)m_scene2D->player.x/(float)screen_width
-			                                                   ,1.0-(float)m_scene2D->player.y/(float)screen_height));
+			,1.0-(float)m_scene2D->player.y/(float)screen_height));
 
 	m_enteringEffect->setFragmentProgram(path+"/pixelate.frag");
 	playEffect(m_enteringEffect);
 }
 
 
+void Game::handleCollision(Body* body1, Body* body2)
+{
+	if(body1->type* body2->type == 2)
+	{
+		m_playerDead = true;
+	}
+	//printf("Collision between %d,%d\n",body1->type,body2->type);
+}
+
 void Game::leaving()
 {
+	m_playerDead = false;
 	for(unsigned int i=0;i<m_mobs.size();i++)
 	{
 		m_world.removeBody(m_mobs[i]->entity());
@@ -184,7 +217,7 @@ void Game::update(int elapsedTimeMS)
 
 	sf::Vector2f mapOrigin = m_player->position()/(float)tile_size;
 
-	if(m_player->position().y > (screen_height+1)*tile_size ) leaving();
+	if(m_player->position().y > (screen_height+1)*tile_size ) m_playerDead = true;
 
 	if(m_width_in_tile <= screen_width )					    	  mapOrigin.x = m_width_in_tile/2;
 	else if(mapOrigin.x< screen_width/2)                              mapOrigin.x = screen_width/2;
@@ -197,6 +230,8 @@ void Game::update(int elapsedTimeMS)
 
 	float offset_map = fmod( mapOrigin.x*(float)tile_size*1.2 , m_bg_text.getSize().x);
 	m_bg_map.setPosition(-offset_map,0);
+
+	if(m_playerDead) leaving();
 
 }
 
