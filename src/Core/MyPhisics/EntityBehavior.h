@@ -1,7 +1,7 @@
 /*
- * Transition.h
+ * EntityBehavior.h
  *
- * TileGame - Copyright (c) 6 f思r. 2013 - Jerome Mourey
+ * TileGame - Copyright (c) 9 f思r. 2013 - Jerome Mourey
  *
  * This software is provided 'as-is', without any express or
  * implied warranty. In no event will the authors be held
@@ -23,39 +23,25 @@
  * 3. This notice may not be removed or altered from any
  *    source distribution.
  *
- *  Created on: 6 f思r. 2013
+ *  Created on: 9 f思r. 2013
  */
 
-#ifndef TRANSITION_H_
-#define TRANSITION_H_
+#ifndef ENTITYBEHAVIOR_H_
+#define ENTITYBEHAVIOR_H_
 
-#include <SFML/Graphics.hpp>
+struct EntityBehavior{
+	EntityBehavior();
+	const float   gravity          ;
+	const float   max_falling_speed;
+	const float   mvt_speed        ;
+	const float   running_speed    ;
+	const float   mvt_acc          ;
+	const float   size             ;
+	const float   jump_impulse     ;
 
-class Screen;
-
-class ScreenEffect
-{
-public:
-	ScreenEffect(Screen* screen,int duration, sf::Vector2f startPos=sf::Vector2f(0.5,0.5));
-	virtual ~ScreenEffect();
-
-
-	virtual void display(sf::RenderTarget* screen_surface);
-    virtual void update(int elapsedTimeMS);
-
-    void setFragmentProgram(const std::string& filename);
-
-    bool isPlaying() const;
-
-private:
-    sf::RenderTexture m_texture;
-    sf::Shader        m_shader;
-    sf::Sprite        m_sprite;
-    int               m_duration;
-    sf::Clock         m_clock;
-    Screen*           m_screen;
-    sf::Vector2f      m_startPos;
-
+//	static const EntityBehavior PLAYER;
+//	static const EntityBehavior MOB;
 };
 
-#endif /* TRANSITION_H_ */
+
+#endif /* ENTITYBEHAVIOR_H_ */

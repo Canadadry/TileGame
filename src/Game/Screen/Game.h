@@ -53,7 +53,7 @@ public:
 	virtual ~Game();
 
 	virtual void handleEvent(const sf::Event& Event);
-    virtual void update(float elapsedTime);
+    virtual void update(int elapsedTimeMS);
 	virtual void entering();
 protected:
     virtual void render(sf::RenderTarget* screen_surface);

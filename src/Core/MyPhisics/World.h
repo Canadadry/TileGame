@@ -29,17 +29,24 @@
 #ifndef WORLD_H_
 #define WORLD_H_
 
-#include <vector>
+#include <list>
 
 class Body;
+class Entity;
 
 class World
 {
 public:
-	void fillWorld(unsigned int width,unsigned int height,unsigned int* data,unsigned int tile_size);
-	bool bodyColliding(const Body& body) const;
+	void appendBody(Body* body);
+	void removeBody(Body* body);
+	void clearBodies();
 
-	std::vector<Body*> world;
+	void step(int elapsedTimeMS);
+	bool checkBodyCollision(Body& body);
+
+private:
+	std::list<Body*> m_bodies;
+	std::list<Entity*> m_entities;
 };
 
 #endif /* WORLD_H_ */

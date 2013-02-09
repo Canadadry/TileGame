@@ -33,8 +33,11 @@
 extern std::string path;
 
 Player::Player(int x,int y,int tile_size)
-: Mob(x,y,tile_size,EntityBehavior::PLAYER)
+: Mob((x+0.5)*tile_size,(y+0.5)*tile_size)//,EntityBehavior::PLAYER)
 {
+	m_entity.setSize(sf::Vector2f(tile_size,1.5*tile_size));
+	m_entity.setOrigin(sf::Vector2f(tile_size/2,tile_size));
+
 	m_texture.loadFromFile(path+"/mario.png");
 	m_sprite.setTileSet(m_texture,5,2);
 	int anim_stopped_left[] = {0};
@@ -125,29 +128,28 @@ void Player::handleEvent(const sf::Event& event)
 	}
 }
 
-void Player::update(const World& world,float elapsedTime)
+void Player::update(int elapsedTimeMS)
 {
-	Mob::update(world,elapsedTime);
+	Mob::update(elapsedTimeMS);
 
 	int line = 0;
 	if(m_entity.direction() == Entity::LEFT) line = 1;
-	if(m_entity.state() == Entity::STOPED)
-	{
-		m_sprite.useAnim(0+4*line);
-	}
-	else if(m_entity.state() == Entity::JUMPING)
+	int state = m_entity.state();
+
+	if((state & Entity::JUMPING) == Entity::JUMPING)
 	{
 		m_sprite.useAnim(3+4*line);
 	}
+	else if((state & Entity::RUNNING) == Entity::RUNNING)
+	{
+		m_sprite.useAnim(2+4*line);
+	}
+	else if((state & Entity::MOVING) == Entity::MOVING)
+	{
+		m_sprite.useAnim(1+4*line);
+	}
 	else
 	{
-		if(m_entity.state() == Entity::RUNNING)
-		{
-			m_sprite.useAnim(2+4*line);
-		}
-		else
-		{
-			m_sprite.useAnim(1+4*line);
-		}
+		m_sprite.useAnim(0+4*line);
 	}
 }

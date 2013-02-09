@@ -81,8 +81,19 @@ Game::Game(Screen* previous)
 		m_tilemap.push_back(map);
 
 	}
-	m_world.fillWorld(m_scene2D->width_in_tile,m_scene2D->height_in_tile,(unsigned int*)&(m_scene2D->collision[0]),m_scene2D->tile_size);
+	//m_world.fillWorld(m_scene2D->width_in_tile,m_scene2D->height_in_tile,(unsigned int*)&(m_scene2D->collision[0]),m_scene2D->tile_size);
 
+	for(int i = 0; i < m_scene2D->width_in_tile ; i++)
+	{
+		for(int j = 0; j < m_scene2D->height_in_tile ; j++)
+		{
+			if(m_scene2D->collision[i+j* m_scene2D->width_in_tile] == 1)
+			{
+				Body* body = new Body(i*tile_size,j*tile_size,tile_size,tile_size);
+				m_world.appendBody(body);
+			}
+		}
+	}
 }
 
 Game::~Game()
@@ -105,6 +116,7 @@ void Game::entering()
 		m_map.push_back(m_tilemap[i]);
 	}
 	m_player = new Player(m_scene2D->player.x,m_scene2D->player.y,m_scene2D->tile_size);
+	m_world.appendBody(m_player->entity());
 	m_map.push_back(m_player->drawable());
 
 	for(unsigned int i=0;i<m_scene2D->entities.size();i++)
@@ -113,6 +125,8 @@ void Game::entering()
 		Mob* mob = new Goomba(entity.x,entity.y,m_scene2D->tile_size);
 		m_mobs.push_back(mob);
 		m_map.push_back(mob->drawable());
+		m_world.appendBody(mob->entity());
+
 	}
 
 	m_enteringEffect= new ScreenEffect(this, 1000,sf::Vector2f( (float)m_scene2D->player.x/(float)screen_width
@@ -130,6 +144,7 @@ void Game::leaving()
 		delete m_mobs[i];
 	}
 	m_mobs.clear();
+	m_world.removeBody(m_player->entity());
 	delete m_player;
 	m_map.clear();
 
@@ -141,13 +156,13 @@ void Game::handleEvent(const sf::Event& Event)
 	m_player->handleEvent(Event);
 }
 
-void Game::update(float elapsedTime)
+void Game::update(int elapsedTimeMS)
 {
 	if(m_enteringEffect != 0)
 	{
 		if(m_enteringEffect->isPlaying())
 		{
-			m_enteringEffect->update(elapsedTime);
+			m_enteringEffect->update(elapsedTimeMS);
 		}
 		else
 		{
@@ -156,13 +171,14 @@ void Game::update(float elapsedTime)
 			stopEffect();
 		}
 	}
-	else if(elapsedTime >0)
+	else if(elapsedTimeMS >0)
 	{
 		for(unsigned int i = 0; i< m_mobs.size();i++)
 		{
-			m_mobs[i]->update(m_world,((float)elapsedTime)/1000.0);
+			m_mobs[i]->update(elapsedTimeMS);
 		}
-		m_player->update(m_world,((float)elapsedTime)/1000.0);
+		m_player->update(elapsedTimeMS);
+		m_world.step(elapsedTimeMS);
 	}
 
 	sf::Vector2f mapOrigin = m_player->position()/(float)tile_size;
@@ -185,10 +201,6 @@ void Game::update(float elapsedTime)
 
 void Game::render(sf::RenderTarget* screen_surface)
 {
-//	if(m_transition)
-//	{
-//		m_transition->display(screen_surface);
-//	}
 	screen_surface->draw(m_bg_map);
 	screen_surface->draw(m_map);
 }

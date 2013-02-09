@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	Title game;
 	Screen* currentScreen = &game;
 
-	int elapsedTime = 0;
+	int elapsedTimeMS = 0;
 	while (window.isOpen() && currentScreen != 0)
 	{
 		sf::Event event;
@@ -45,17 +45,16 @@ int main(int argc, char** argv)
 				currentScreen->handleEvent(event);
 			}
 		}
-		if(elapsedTime >0)
+		if(elapsedTimeMS >0)
 		{
-			currentScreen->update(elapsedTime);
+			currentScreen->update(elapsedTimeMS);
 		}
 
 		window.setActive(true);
 		window.clear(sf::Color::Black);
 		currentScreen->display(&window);
 		window.display();
-		elapsedTime = clock.getElapsedTime().asMilliseconds();
-		clock.restart();
+		elapsedTimeMS = clock.restart().asMilliseconds();
 
 		if(currentScreen->isScreenFinished())
 		{

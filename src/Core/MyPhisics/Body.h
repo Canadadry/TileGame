@@ -30,7 +30,9 @@
 #define BODY_H_
 
 #include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics/Transformable.hpp>
+#include  <SFML/Graphics/Rect.hpp>
+
+class World;
 
 class Body
 {
@@ -43,7 +45,8 @@ public:
 	void setSize(sf::Vector2f size);
 	sf::Vector2f position() const;
 
-	bool intersects(const Body& body)const;
+	virtual bool intersects(const Body& body)const;
+	virtual void step(World& world,int elapsedTimeMS){}
 
 protected:
 	sf::FloatRect m_aabb;

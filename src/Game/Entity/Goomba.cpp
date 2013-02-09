@@ -35,8 +35,11 @@ extern std::string path;
 
 
 Goomba::Goomba(int x,int y,int tile_size)
-: Mob(x,y,tile_size)
+: Mob((x+0.5)*tile_size,(y+0.5)*tile_size)
 {
+	m_entity.setSize(sf::Vector2f(tile_size,tile_size));
+	m_entity.setOrigin(sf::Vector2f(tile_size/2,tile_size/2));
+
 	if(m_texture_init == false)
 	{
 		m_texture.loadFromFile(path+"/goomba.png");
@@ -57,11 +60,11 @@ Goomba::~Goomba()
 {
 }
 
-void Goomba::update(const World& world,float elapsedTime)
+void Goomba::update(float elapsedTime)
 {
-	Mob::update(world,elapsedTime);
+	Mob::update(elapsedTime);
 
-	if(m_entity.state() == Entity::STOPED)
+	if(m_entity.state() == 0)
 	{
 		if(m_entity.direction() == Entity::LEFT) m_entity.move(Entity::RIGHT);
 		else                                     m_entity.move(Entity::LEFT);

@@ -31,27 +31,10 @@
 
 #include <SFML/System/Vector2.hpp>
 #include "Body.h"
-
-struct EntityBehavior{
-	const int   gravity          ;
-	const int   max_falling_speed;
-	const int   mvt_speed        ;
-	const int   running_speed    ;
-	const int   mvt_acc          ;
-	const float size             ;
-	const int   jump_impulse     ;
-
-	static const EntityBehavior PLAYER;
-	static const EntityBehavior MOB;
-};
-
-
-
-
-class TileMap;
+#include "EntityBehavior.h"
 class World;
 
-class Entity
+class Entity : public Body
 {
 public :
 	enum Direction{
@@ -60,49 +43,33 @@ public :
 		LEFT = 180,
 		RIGHT = 0
 	};
-	enum State{
-		STOPED,
-		MOVING,
-		RUNNING,
-		JUMPING,
-		FALLING
+	enum StateFlag{
+		MOVING  = 1<<0,
+		RUNNING = 1<<1,
+		JUMPING = 1<<2,
+		FALLING = 1<<3
 	};
 
-
-	Entity(int pos_x,int pos_y,int size,const EntityBehavior& behavior);
+	Entity(int pos_x,int pos_y,const EntityBehavior& behavior);
+	virtual void step(World& world,int elapsedTimeMS);
 
 	void move(Entity::Direction dir);
 	void running(bool enable);
 	void jump();
 	void stop();
 
-	Entity::State state() const;
+	int state() const;
 	Entity::Direction direction() const;
 
-	void update(const World& world,float elapsedTime);
-
-	sf::Vector2f position() const;
-
 private:
-	sf::Vector2f m_pos;
-	Body m_body;
-	float m_moving_max_speed;
-	float m_moving_speed;
-	float m_moving_acceleration;
-	float m_falling_speed;
-	float m_max_falling_speed;
-	float m_max_current_speed;
-	float m_y_gravity;
-	Entity::Direction   m_direction;
-	bool  m_moving;
-	bool  m_jumping;
-	bool  m_running;
-	float m_jump_speed;
-
 	const EntityBehavior m_behavior;
+	sf::Vector2f         m_speed;
+	sf::Vector2f         m_max_speed;
+	sf::Vector2f         m_acceleration;
+	Entity::Direction    m_direction;
+	int                  m_state;
 
-	void jumping(const World& world,float elapsedTime);
-	void falling(const World& world,float elapsedTime);
+	void falling(World& world,int elapsedTimeMS);
 
 };
 

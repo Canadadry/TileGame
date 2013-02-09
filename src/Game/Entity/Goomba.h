@@ -39,7 +39,7 @@ public:
 	Goomba(int x,int y,int tile_size);
 	virtual ~Goomba();
 
-	virtual void update(const World& world,float elapsedTime);
+	virtual void update(float elapsedTime);
 
 private:
 	static sf::Texture m_texture;

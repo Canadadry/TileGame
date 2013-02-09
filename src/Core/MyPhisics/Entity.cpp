@@ -30,72 +30,33 @@
 #include "World.h"
 #include <cmath>
 
-const EntityBehavior EntityBehavior::PLAYER = {
-		/* gravity          */ 40*32,
-		/* max_falling_speed*/ 20*32,
-		/* mvt_speed        */ 3*32,
-		/* running_speed    */ 7*32,
-		/* mvt_acc          */ 9*32,
-		/* size             */ 0.6,
-		/* jump_impulse     */ 15*32,
-};
-
-const EntityBehavior EntityBehavior::MOB = {
-		/* gravity          */ 40*32,
-		/* max_falling_speed*/ 20*32,
-		/* mvt_speed        */ 3*32,
-		/* running_speed    */ 9*32,
-		/* mvt_acc          */ 9*32,
-		/* size             */ 0.6,
-		/* jump_impulse     */ 15*32,
-};
-
-
-Entity::Entity(int pos_x,int pos_y,int size,const EntityBehavior& behavior)
-: m_pos(pos_x,pos_y)
-, m_body(0,0,size,size)
-, m_moving_max_speed(behavior.mvt_speed)
-, m_moving_speed(0)
-, m_moving_acceleration(behavior.mvt_acc)
-, m_falling_speed(0)
-, m_max_falling_speed(behavior.max_falling_speed)
-, m_max_current_speed(m_moving_max_speed)
-, m_y_gravity(behavior.gravity)
-, m_direction(Entity::UP)
-, m_moving(false)
-, m_jumping(false)
-, m_running(false)
-, m_jump_speed(0.0)
-, m_behavior(behavior)
+Entity::Entity(int pos_x,int pos_y,const EntityBehavior& behavior)
+: Body(0,0,0,0)
+, m_behavior    (behavior)
+, m_speed       (0.0,0.0)
+, m_max_speed   (behavior.mvt_speed,behavior.max_falling_speed)
+, m_acceleration(m_behavior.mvt_acc,m_behavior.gravity)
+, m_direction   (Entity::UP)
+, m_state       (0)
 {
-	m_body.setOrigin(sf::Vector2f(size/2,size/2));
-}
-
-sf::Vector2f Entity::position() const
-{
-	return m_pos;
+	setPosition(sf::Vector2f(pos_x,pos_y));
 }
 
 void Entity::move(Direction dir)
 {
-	m_moving = true;
+	m_state = m_state | Entity::MOVING;
 	m_direction = dir;
 }
 
 void Entity::stop()
 {
-	m_moving = false;
+	m_state = m_state & (~(Entity::MOVING | Entity::RUNNING));
 }
 
-Entity::State Entity::state() const
+int Entity::state() const
 {
-	if(m_jumping) return Entity::JUMPING;
-	if(fabs(m_falling_speed) > 1.0)  return Entity::FALLING;
-	if( fabs(m_moving_speed) > m_behavior.mvt_speed ) return Entity::RUNNING;
-	if( fabs(m_moving_speed) > 1.0 ) return Entity::MOVING;
-	return Entity::STOPED;
+	return m_state;
 }
-
 
 Entity::Direction Entity::direction() const
 {
@@ -104,102 +65,90 @@ Entity::Direction Entity::direction() const
 
 void Entity::running(bool enable)
 {
-	m_running = enable;
-	m_max_current_speed = m_running ? m_behavior.running_speed : m_behavior.mvt_speed;
+	if(enable)
+	{
+		m_state = m_state  | Entity::RUNNING;
+	}
+	else
+	{
+		m_state = m_state  & ~Entity::RUNNING;
+	}
+	m_max_speed.x = enable ? m_behavior.running_speed : m_behavior.mvt_speed;
 }
 
 void Entity::jump()
 {
-	if(m_jumping == false)
+	if((m_state & Entity::JUMPING) != Entity::JUMPING)
 	{
-		if(m_falling_speed < 1.0)
+		if(m_speed.y < 1.0)
 		{
-			m_jumping = true;
-			m_jump_speed = m_behavior.jump_impulse;
+			m_state = m_state  | Entity::JUMPING;
+			m_speed.y = -m_behavior.jump_impulse;
+
 		}
 	}
 }
 
-void Entity::update(const World& world,float elapsedTime)
+void Entity::step(World& world, int elapsedTimeMS)
 {
 
-	sf::Vector2f pos = m_pos;
-	if(m_moving)
+	sf::Vector2f      pos = position();
+	sf::Vector2f last_pos = position();
+	if((m_state & Entity::MOVING) == Entity::MOVING)
 	{
 		switch(m_direction)
 		{
 			case Entity::UP    : break;
 			case Entity::DOWN  : break;
-			case Entity::LEFT  : m_moving_speed -= m_moving_acceleration*elapsedTime; break;
-			case Entity::RIGHT : m_moving_speed += m_moving_acceleration*elapsedTime; break;
+			case Entity::LEFT  : m_speed.x -= m_acceleration.x*elapsedTimeMS; break;
+			case Entity::RIGHT : m_speed.x += m_acceleration.x*elapsedTimeMS; break;
 		}
 
-		if(fabs(m_moving_speed) > fabs(m_max_current_speed) )
+		if(fabs(m_speed.x) > fabs(m_max_speed.x) )
 		{
-			m_moving_speed = (m_moving_speed > 0)? m_max_current_speed:-m_max_current_speed;
+			m_speed.x = (m_speed.x > 0)? m_max_speed.x:-m_max_speed.x;
 		}
 	}
 	else
 	{
-		m_moving_speed*=0.5;
+		m_speed.x*=0.5;
 	}
 
+	pos.x += m_speed.x*elapsedTimeMS;
 
-	pos.x += m_moving_speed*elapsedTime;
+	setPosition(pos);
+	if(world.checkBodyCollision(*this))
+	{
 
-	m_body.setPosition(pos);
-	if(!world.bodyColliding(m_body)) m_pos = pos;
-	else                             m_moving_speed = 0.0;
+		setPosition(last_pos);
+		m_speed.x = 0.0;
+	}
 
-	jumping(world,elapsedTime);
-	falling(world,elapsedTime);
-
-	m_body.setPosition(m_pos);
+	falling(world,elapsedTimeMS);
 
 }
 
 
-void Entity::jumping(const World& world,float elapsedTime)
+void Entity::falling(World& world,int elapsedTimeMS)
 {
-	if(m_jumping)
-	{
-		m_jump_speed -= m_y_gravity* elapsedTime;
-		if(m_jump_speed <= 0)
-		{
-			m_jump_speed = 0.0;
-		}
-		sf::Vector2f pos = m_pos;
-		pos.y -= m_jump_speed*elapsedTime;
+	sf::Vector2f      pos = position();
+	sf::Vector2f last_pos = position();
 
-		m_body.setPosition(pos);
-		if(!world.bodyColliding(m_body)) m_pos = pos;
-		else                             m_jump_speed = 0.0;
+	m_speed.y += m_behavior.gravity*elapsedTimeMS;
+
+	if(fabs(m_speed.y) > fabs(m_max_speed.y) )
+	{
+		m_speed.y = (m_speed.y > 0)? m_max_speed.y:-m_max_speed.y;
 	}
-}
 
-void Entity::falling(const World& world,float elapsedTime)
-{
-	if(m_jump_speed <=0)
+	pos.y += m_speed.y*elapsedTimeMS;
+
+	setPosition(pos);
+	if(world.checkBodyCollision(*this))
 	{
-		sf::Vector2f pos = m_pos;
-		m_falling_speed += m_y_gravity* elapsedTime;
-		if(m_falling_speed > m_max_falling_speed)
-		{
-			m_falling_speed = m_max_falling_speed;
-			//			printf("m_max_falling_speed\n");
-		}
-
-		pos.y += m_falling_speed*elapsedTime;
-		m_body.setPosition(pos);
-		if(!world.bodyColliding(m_body)) m_pos = pos;
-		else
-		{
-			//			if(m_jumping){
-			//				printf("falling_speed : %lf\n",m_falling_speed);
-			//			}
-			m_jumping = false;
-			m_falling_speed = 0.0;
-		}
+		setPosition(last_pos);
+		if(m_speed.y > 0 ) 	m_state = m_state  & ~Entity::JUMPING;
+		m_speed.y = 0.0;
 	}
 }
 

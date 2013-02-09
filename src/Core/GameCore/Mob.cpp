@@ -39,10 +39,9 @@
 #include "../MyPhisics/World.h"
 
 
-	Mob::Mob(int x,int y,int tile_size, const EntityBehavior& behavior)
-	: m_entity((x+0.5)*tile_size,(y+0.5)*tile_size,tile_size,behavior)
+	Mob::Mob(int x,int y, const EntityBehavior& behavior)
+	: m_entity(x,y,behavior)
 	, m_sprite()
-	, m_tile_size(tile_size)
 	, m_direction(Entity::LEFT)
 	{
 		m_sprite.setPosition(m_entity.position());
@@ -50,10 +49,9 @@
 
 	Mob::~Mob(){}
 
-	void Mob::update(const World& world,float elapsedTime)
+	void Mob::update(int elapsedTimeMS)
 	{
 		m_sprite.update();
-		m_entity.update(world,elapsedTime);
 		m_sprite.setPosition(m_entity.position());
 	}
 
@@ -61,3 +59,9 @@
 	{
 		return (sf::Drawable*)&m_sprite;
 	}
+
+Entity* Mob::entity()
+{
+	return &m_entity;
+}
+

@@ -28,28 +28,54 @@
 
 #include "World.h"
 #include "Body.h"
+#include "Entity.h"
 
-void World::fillWorld(unsigned int width,unsigned int height,unsigned int* data,unsigned int tile_size)
+void World::appendBody(Body* body)
 {
-	for(unsigned int i = 0; i < width ; i++)
+	//TODO Check if updatable then push_front instead of pushing_back
+	m_bodies.push_back(body);
+	Entity* entity = dynamic_cast<Entity*>(body);
+	if(entity)
 	{
-		for(unsigned int j = 0; j < height ; j++)
-		{
-			if(data[i+j*width] == 1)
-			{
-				Body* body = new Body(i*tile_size,j*tile_size,tile_size,tile_size);
-				world.push_back(body);
-			}
-		}
+		m_entities.push_back(entity);
 	}
 }
 
-bool World::bodyColliding(const Body& body) const
+void World::removeBody(Body* body)
+{
+	m_bodies.remove(body);
+	Entity* entity = dynamic_cast<Entity*>(body);
+	if(entity)
+	{
+		m_entities.remove(entity);
+	}
+}
+
+void World::clearBodies()
+{
+	m_bodies.clear();
+	m_entities.clear();
+}
+
+typedef std::list<Body*>::iterator   bIter;
+typedef std::list<Entity*>::iterator eIter;
+
+void World::step(int elapsedTimeMS)
+{
+	//TODO only update body that can move ie Entities
+	for(eIter it = m_entities.begin() ; it != m_entities.end() ; it++ )
+	{
+		(*it)->step(*this,elapsedTimeMS);
+	}
+}
+
+bool World::checkBodyCollision(Body& body)
 {
 	bool ret = false;
-	for(unsigned int i = 0;i< world.size(); i++ )
+	for(bIter it = m_bodies.begin() ; it != m_bodies.end() ; it++ )
 	{
-		ret = ret || world[i]->intersects(body);
+		if(&body == *it) continue;
+		ret = ret || body.intersects(**it);
 	}
 
 	return ret;

@@ -36,7 +36,7 @@ public:
 
 	virtual void entering() {}
 	virtual void handleEvent(const sf::Event& Event) = 0;
-    virtual void update(float elapsedTime) =0;
+    virtual void update(int elapsedTimeMS) =0;
 };
 
 #endif

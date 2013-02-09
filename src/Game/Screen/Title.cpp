@@ -60,7 +60,7 @@ void Title::handleEvent(const sf::Event& event)
 	}
 }
 
-void Title::update(float elapsedTime)
+void Title::update(int elapsedTimeMS)
 {
 
 }

@@ -46,7 +46,7 @@ public:
 	sf::Vector2f position() const;
 
 	virtual void handleEvent(const sf::Event& event);
-	virtual void update(const World& world,float elapsedTime);
+	virtual void update(int elapsedTimeMS);
 
 private:
 	sf::Texture m_texture;

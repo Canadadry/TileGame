@@ -37,15 +37,16 @@ class World;
 class Mob
 {
 public:
-	Mob(int x,int y,int tile_size, const EntityBehavior& behavior= EntityBehavior::MOB);
+	Mob(int x,int y, const EntityBehavior& behavior= EntityBehavior());
 	virtual ~Mob();
-	virtual void update(const World& world,float elapsedTime);
+	virtual void update(int elapsedTimeMS);
 	virtual sf::Drawable* drawable() const;
+
+	Entity* entity();
 
 protected:
 	Entity m_entity;
 	AnimatedTile m_sprite;
-	const int m_tile_size;
 	Entity::Direction m_direction;
 };
 

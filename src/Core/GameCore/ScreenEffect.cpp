@@ -75,7 +75,7 @@ void ScreenEffect::display(sf::RenderTarget* screen_surface)
 	screen_surface->draw(m_sprite,states);
 }
 
-void ScreenEffect::update(float elapsedTime)
+void ScreenEffect::update(int elapsedTimeMS)
 {
 	if(isPlaying())
 	{

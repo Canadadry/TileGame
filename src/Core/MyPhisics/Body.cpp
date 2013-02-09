@@ -40,7 +40,9 @@ Body::Body(float left,float top, float width, float height, float xOrigin, float
 
 void Body::setOrigin(sf::Vector2f origin)
 {
+	sf::Vector2f pos = position();
 	m_origin = origin;
+	setPosition(pos);
 }
 
 void Body::setPosition(sf::Vector2f position)
@@ -57,12 +59,13 @@ void Body::setSize(sf::Vector2f size)
 
 sf::Vector2f Body::position() const
 {
-	return sf::Vector2f(m_aabb.left,m_aabb.top) - m_origin;
+	return sf::Vector2f(m_aabb.left,m_aabb.top) + m_origin;
 }
 
 bool Body::intersects(const Body& body)const
 {
-	return m_aabb.intersects(body.m_aabb);
+	sf::FloatRect intersection;
+	return m_aabb.intersects(body.m_aabb,intersection);
 }
 
 
