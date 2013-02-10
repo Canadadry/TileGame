@@ -150,5 +150,10 @@ void Entity::falling(World& world,int elapsedTimeMS)
 		if(m_speed.y > 0 ) 	m_state = m_state  & ~Entity::JUMPING;
 		m_speed.y = 0.0;
 	}
+	else
+	{
+		if(m_speed.y > 0 ) 	m_state = m_state  | Entity::JUMPING;
+
+	}
 }
 

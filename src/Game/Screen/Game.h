@@ -60,6 +60,7 @@ public:
 	virtual void handleCollision(Body* body1,Body* body2);
 protected:
     virtual void render(sf::RenderTarget* screen_surface);
+    void killBody();
 private:
 	void leaving();
 
@@ -83,6 +84,7 @@ private:
 	int m_height_in_tile;
 
 	bool m_playerDead;
+	Body* m_bodyToKill;
 
 };
 

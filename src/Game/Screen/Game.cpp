@@ -45,6 +45,7 @@ namespace BodyType
 	};
 }
 
+bool makePlayerJump;
 
 Game::Game(Screen* previous)
 : m_enteringEffect(0)
@@ -63,7 +64,10 @@ Game::Game(Screen* previous)
 , m_width_in_tile(0)
 , m_height_in_tile(0)
 , m_playerDead(false)
+, m_bodyToKill(0)
 {
+
+	makePlayerJump = false;
 
 	m_scene2D = new Scene2D(path+"/level_fat.tmx");
 	if(!m_scene2D->loadSuccessfull()) return ;
@@ -164,9 +168,79 @@ void Game::handleCollision(Body* body1, Body* body2)
 {
 	if(body1->type* body2->type == 2)
 	{
-		m_playerDead = true;
+		if((m_player->entity()->state() & Entity::JUMPING) == Entity::JUMPING)
+		{
+			makePlayerJump = true;
+			// let's kill the goomba
+			if(m_player->entity() == body1)
+			{
+				m_bodyToKill = body2;
+			}
+			else
+			{
+				m_bodyToKill = body1 ;
+			}
+		}
+		else
+		{
+			m_playerDead = true;
+		}
+	}
+	else if(body1->type* body2->type == 4)
+	{
+		Entity* mob1 = dynamic_cast<Entity*>(body1);
+		Entity* mob2 = dynamic_cast<Entity*>(body2);
+
+		if(mob1 && mob2)
+		{
+
+			if(mob1->direction() == Entity::LEFT)
+			{
+				mob1->move(Entity::RIGHT);
+				mob2->move(Entity::LEFT);
+			}
+			else
+			{
+				mob1->move(Entity::LEFT);
+				mob2->move(Entity::RIGHT);
+			}
+		}
+		else
+		{
+			printf("dynamic cast failed\n");
+		}
+
 	}
 	//printf("Collision between %d,%d\n",body1->type,body2->type);
+}
+
+void Game::killBody()
+{
+	if(m_bodyToKill)
+	{
+		m_world.removeBody(m_bodyToKill);
+
+		for(unsigned int i=0;i<m_mobs.size();i++)
+		{
+			if(m_mobs[i]->entity() == m_bodyToKill)
+			{
+				Mob* mobToDelete = m_mobs[i];
+				for(unsigned int j=0;j<m_map.size();j++)
+				{
+					if(mobToDelete->drawable() == m_map[j])
+					{
+						m_map.erase(m_map.begin()+j);
+						break;
+					}
+				}
+
+				m_mobs.erase(m_mobs.begin()+i);
+				delete mobToDelete;
+				break;
+			}
+		}
+		m_bodyToKill = 0;
+	}
 }
 
 void Game::leaving()
@@ -214,6 +288,14 @@ void Game::update(int elapsedTimeMS)
 		m_player->update(elapsedTimeMS);
 		m_world.step(elapsedTimeMS);
 	}
+
+	if(makePlayerJump)
+	{
+		m_player->entity()->jump();
+		makePlayerJump = false;
+	}
+
+	killBody();
 
 	sf::Vector2f mapOrigin = m_player->position()/(float)tile_size;
 
