@@ -1,7 +1,7 @@
 /*
- * EntityBehavior.h
+ * Coin.h
  *
- * TileGame - Copyright (c) 9 f思r. 2013 - Jerome Mourey
+ * TileGame - Copyright (c) 10 f思r. 2013 - Jerome Mourey
  *
  * This software is provided 'as-is', without any express or
  * implied warranty. In no event will the authors be held
@@ -23,31 +23,28 @@
  * 3. This notice may not be removed or altered from any
  *    source distribution.
  *
- *  Created on: 9 f思r. 2013
+ *  Created on: 10 f思r. 2013
  */
 
-#ifndef ENTITYBEHAVIOR_H_
-#define ENTITYBEHAVIOR_H_
+#ifndef COIN_H_
+#define COIN_H_
 
-struct EntityBehavior{
-//	EntityBehavior();
-	EntityBehavior( float   gravity           = 4.5*32.0 / 100000.0 ,
-					float   max_falling_speed = 20.0*32.0 / 1000.0  ,
-					float   mvt_speed         = 3.0 *32.0 / 1000.0  ,
-					float   running_speed     = 7.0 *32.0 / 1000.0  ,
-					float   mvt_acc           = 9.0 *32.0 / 1000.0  ,
-					float   size              = 0.6                 );
-	const float   gravity          ;
-	const float   max_falling_speed;
-	const float   mvt_speed        ;
-	const float   running_speed    ;
-	const float   mvt_acc          ;
-	const float   size             ;
-	const float   jump_impulse     ;
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/Vector2.hpp>
+#include "../../Core/GameCore/Mob.h"
 
-//	static const EntityBehavior PLAYER;
-//	static const EntityBehavior MOB;
+class Coin : public Mob
+{
+public:
+	Coin(int x,int y,int tile_size);
+	virtual ~Coin();
+
+//	virtual void update(float elapsedTime);
+
+private:
+	static sf::Texture m_texture;
+	static bool m_texture_init;
+
 };
 
-
-#endif /* ENTITYBEHAVIOR_H_ */
+#endif /* COIN_H_ */

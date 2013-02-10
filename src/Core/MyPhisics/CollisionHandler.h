@@ -35,7 +35,7 @@ class CollisionHandler
 {
 public:
 	virtual ~CollisionHandler();
-	virtual void handleCollision(Body* body1,Body* body2) = 0;
+	virtual bool handleCollision(Body* body1,Body* body2) = 0;
 };
 
 #endif /* COLLISIONHANDLER_H_ */

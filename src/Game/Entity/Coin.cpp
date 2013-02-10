@@ -1,7 +1,7 @@
 /*
- * EntityBehavior.h
+ * Coin.cpp
  *
- * TileGame - Copyright (c) 9 f思r. 2013 - Jerome Mourey
+ * TileGame - Copyright (c) 10 f思r. 2013 - Jerome Mourey
  *
  * This software is provided 'as-is', without any express or
  * implied warranty. In no event will the authors be held
@@ -23,31 +23,40 @@
  * 3. This notice may not be removed or altered from any
  *    source distribution.
  *
- *  Created on: 9 f思r. 2013
+ *  Created on: 10 f思r. 2013
  */
 
-#ifndef ENTITYBEHAVIOR_H_
-#define ENTITYBEHAVIOR_H_
-
-struct EntityBehavior{
-//	EntityBehavior();
-	EntityBehavior( float   gravity           = 4.5*32.0 / 100000.0 ,
-					float   max_falling_speed = 20.0*32.0 / 1000.0  ,
-					float   mvt_speed         = 3.0 *32.0 / 1000.0  ,
-					float   running_speed     = 7.0 *32.0 / 1000.0  ,
-					float   mvt_acc           = 9.0 *32.0 / 1000.0  ,
-					float   size              = 0.6                 );
-	const float   gravity          ;
-	const float   max_falling_speed;
-	const float   mvt_speed        ;
-	const float   running_speed    ;
-	const float   mvt_acc          ;
-	const float   size             ;
-	const float   jump_impulse     ;
-
-//	static const EntityBehavior PLAYER;
-//	static const EntityBehavior MOB;
-};
+#include "Coin.h"
 
 
-#endif /* ENTITYBEHAVIOR_H_ */
+sf::Texture Coin::m_texture;
+bool Coin::m_texture_init;
+
+extern std::string path;
+
+Coin::Coin(int x,int y,int tile_size)
+: Mob((x+0.5)*tile_size,(y+0.5)*tile_size,EntityBehavior(0.0,0.0,0.0,0.0))
+{
+	m_entity.setSize(sf::Vector2f(tile_size,tile_size));
+	m_entity.setOrigin(sf::Vector2f(tile_size/2,tile_size/2));
+
+	if(m_texture_init == false)
+	{
+		m_texture.loadFromFile(path+"/coin.png");
+		m_texture_init = true;
+	}
+	m_sprite.setTileSet(m_texture,4,1);
+	int anim_moving[] = {0,1,2,3};
+	std::vector<int> anim ;
+	anim.assign(anim_moving,anim_moving+2);
+	m_sprite.appendAnimDesc(anim,200);
+	m_sprite.useAnim(0);
+	m_sprite.setOrigin(8,8);
+
+}
+
+Coin::~Coin()
+{
+	// TODO Auto-generated destructor stub
+}
+

@@ -89,16 +89,16 @@ bool World::checkBodyCollision(Body& body)
 		if(&body == *it) continue;
 		if( body.intersects(**it))
 		{
-			ret = true;
-			m_collisionHandler->handleCollision(&body,*it);
+			ret = ret | m_collisionHandler->handleCollision(&body,*it);
 		}
 	}
 
 	return ret;
 }
 
-void World::handleCollision(Body* body1, Body* body2)
+bool World::handleCollision(Body* body1, Body* body2)
 {
+	return true;
 }
 
 

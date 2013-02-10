@@ -28,6 +28,7 @@
 
 #include "Game.h"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include  "Game/Entity/Coin.h"
 #include <cmath>
 
 
@@ -41,7 +42,8 @@ namespace BodyType
 	enum BodyType{
 		Tile   = 0,
 		Player  ,
-		Goomba
+		Goomba  ,
+		Coin
 	};
 }
 
@@ -148,12 +150,23 @@ void Game::entering()
 	for(unsigned int i=0;i<m_scene2D->entities.size();i++)
 	{
 		Scene2D::Entity& entity = m_scene2D->entities[i];
-		Mob* mob = new Goomba(entity.x,entity.y,m_scene2D->tile_size);
-		mob->entity()->type = BodyType::Goomba;
-		m_mobs.push_back(mob);
-		m_map.push_back(mob->drawable());
-		m_world.appendBody(mob->entity());
-
+		Mob* mob = 0;
+		//		printf("entity id is %d\n",entity.entityId);
+		switch(entity.entityId)
+		{
+			case 2 : mob = new Goomba(entity.x,entity.y,m_scene2D->tile_size);break;
+			case 3 : mob = new Coin(entity.x,entity.y,m_scene2D->tile_size);break;
+			case 0 :
+			case 1 :
+			default : break;
+		}
+		if(mob != NULL)
+		{
+			mob->entity()->type = entity.entityId;//BodyType::Goomba;
+			m_mobs.push_back(mob);
+			m_map.push_back(mob->drawable());
+			m_world.appendBody(mob->entity());
+		}
 	}
 
 	m_enteringEffect= new ScreenEffect(this, 1000,sf::Vector2f( (float)m_scene2D->player.x/(float)screen_width
@@ -164,14 +177,42 @@ void Game::entering()
 }
 
 
-void Game::handleCollision(Body* body1, Body* body2)
+bool Game::handleCollision(Body* body1, Body* body2)
 {
-	if(body1->type* body2->type == 2)
+	bool ret = true;
+
+	if(body1->type == BodyType::Coin || body2->type == BodyType::Coin)
 	{
-		if((m_player->entity()->state() & Entity::JUMPING) == Entity::JUMPING)
+		ret= false;
+	}
+
+
+	if(body1->type == BodyType::Player || body2->type == BodyType::Player)
+	{
+		if(body1->type == BodyType::Goomba || body2->type == BodyType::Goomba)
 		{
-			makePlayerJump = true;
-			// let's kill the goomba
+			if((m_player->entity()->state() & Entity::JUMPING) == Entity::JUMPING)
+			{
+				makePlayerJump = true;
+				// let's kill the goomba
+				if(m_player->entity() == body1)
+				{
+					m_bodyToKill = body2;
+				}
+				else
+				{
+					m_bodyToKill = body1 ;
+				}
+			}
+			else
+			{
+				m_playerDead = true;
+			}
+
+		}
+		else if(body1->type == BodyType::Coin || body2->type == BodyType::Coin)
+		{
+			ret= false;
 			if(m_player->entity() == body1)
 			{
 				m_bodyToKill = body2;
@@ -181,36 +222,36 @@ void Game::handleCollision(Body* body1, Body* body2)
 				m_bodyToKill = body1 ;
 			}
 		}
-		else
-		{
-			m_playerDead = true;
-		}
 	}
-	else if(body1->type* body2->type == 4)
+	else if(body1->type == BodyType::Goomba || body2->type == BodyType::Goomba)
 	{
-		Entity* mob1 = dynamic_cast<Entity*>(body1);
-		Entity* mob2 = dynamic_cast<Entity*>(body2);
-
-		if(mob1 && mob2)
+		if(body1->type == BodyType::Goomba && body2->type == BodyType::Goomba)
 		{
+			Entity* mob1 = dynamic_cast<Entity*>(body1);
+			Entity* mob2 = dynamic_cast<Entity*>(body2);
 
-			if(mob1->direction() == Entity::LEFT)
+			if(mob1 && mob2)
 			{
-				mob1->move(Entity::RIGHT);
-				mob2->move(Entity::LEFT);
+
+				if(mob1->direction() == Entity::LEFT)
+				{
+					mob1->move(Entity::RIGHT);
+					mob2->move(Entity::LEFT);
+				}
+				else
+				{
+					mob1->move(Entity::LEFT);
+					mob2->move(Entity::RIGHT);
+				}
 			}
 			else
 			{
-				mob1->move(Entity::LEFT);
-				mob2->move(Entity::RIGHT);
+				printf("dynamic cast failed\n");
 			}
 		}
-		else
-		{
-			printf("dynamic cast failed\n");
-		}
-
 	}
+
+	return ret;
 	//printf("Collision between %d,%d\n",body1->type,body2->type);
 }
 

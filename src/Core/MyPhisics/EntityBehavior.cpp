@@ -31,15 +31,32 @@
 
 const float max_height_jump = 16*6.5;
 
-EntityBehavior::EntityBehavior()
-:gravity          (4.5*32.0 / 100000.0  )
-,max_falling_speed(20.0*32.0 / 1000.0  )
-,mvt_speed        (3.0 *32.0 / 1000.0  )
-,running_speed    (7.0 *32.0 / 1000.0  )
-,mvt_acc          (9.0 *32.0 / 1000.0  )
-,size             (0.6                 )
+//EntityBehavior::EntityBehavior()
+//:gravity          (4.5*32.0 / 100000.0  )
+//,max_falling_speed(20.0*32.0 / 1000.0  )
+//,mvt_speed        (3.0 *32.0 / 1000.0  )
+//,running_speed    (7.0 *32.0 / 1000.0  )
+//,mvt_acc          (9.0 *32.0 / 1000.0  )
+//,size             (0.6                 )
+//,jump_impulse     (sqrt(2*gravity*max_height_jump)) //20.0*32.0 / 1000.0  )  //hauteur max = 0.5*jump_impulse^2/gravity en pix
+//{}
+//
+
+EntityBehavior::EntityBehavior(  float   p_gravity          ,
+                                 float   p_max_falling_speed,
+                                 float   p_mvt_speed        ,
+                                 float   p_running_speed    ,
+                                 float   p_mvt_acc          ,
+                                 float   p_size             )
+:gravity          (p_gravity          )
+,max_falling_speed(p_max_falling_speed)
+,mvt_speed        (p_mvt_speed        )
+,running_speed    (p_running_speed    )
+,mvt_acc          (p_mvt_acc          )
+,size             (p_size             )
 ,jump_impulse     (sqrt(2*gravity*max_height_jump)) //20.0*32.0 / 1000.0  )  //hauteur max = 0.5*jump_impulse^2/gravity en pix
 {}
+
 
 //const EntityBehavior EntityBehavior::PLAYER(
 //		/* gravity          */ 40*32 / 1000,

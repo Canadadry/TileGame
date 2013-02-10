@@ -57,7 +57,7 @@ public:
     virtual void update(int elapsedTimeMS);
 	virtual void entering();
 
-	virtual void handleCollision(Body* body1,Body* body2);
+	virtual bool handleCollision(Body* body1,Body* body2);
 protected:
     virtual void render(sf::RenderTarget* screen_surface);
     void killBody();

@@ -46,7 +46,7 @@ public:
 	void step(int elapsedTimeMS);
 	bool checkBodyCollision(Body& body);
 
-	virtual void handleCollision(Body* body1,Body* body2);
+	virtual bool handleCollision(Body* body1,Body* body2);
 
 private:
 	CollisionHandler* m_collisionHandler;
